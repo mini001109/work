@@ -515,7 +515,7 @@
 
       <div class="panel">
         <div class="panel-title">재해자 직무유형별 현황</div>
-        <div class="panel-sub">매장 · 본사(사무직) &nbsp;·&nbsp; 각 사건의 "소속" 값을 기준으로 자동 집계됩니다</div>
+        <div class="panel-sub">매장 · 본사(사무직)</div>
         <div class="job-flex">
           <div class="ring-wrap">
             <svg class="ring" id="ringEl" viewBox="0 0 168 168"></svg>
@@ -576,22 +576,10 @@
     },
   ];
 
-  let jobData = [];
-  function computeJobData() {
-    let store = 0, office = 0, unassigned = 0;
-    typeData.forEach(t => t.cases.forEach(c => {
-      const a = (c.affil || '').trim();
-      if (!a) unassigned++;
-      else if (a.includes('본사')) office++;
-      else store++;
-    }));
-    const arr = [
-      { id: 'store', name: '매장', color: '#C9860A', value: store },
-      { id: 'office', name: '본사(사무직)', color: '#4C6B8A', value: office },
-    ];
-    if (unassigned > 0) arr.push({ id: 'unassigned', name: '소속 미입력', color: '#8A94A6', value: unassigned });
-    return arr;
-  }
+  let jobData = [
+    { id: 'store', name: '매장', value: 7, color: '#C9860A' },
+    { id: 'office', name: '본사(사무직)', value: 2, color: '#4C6B8A' },
+  ];
 
   function sum(arr) { return arr.reduce((a, b) => a + (b.cases ? b.cases.length : b.value), 0); }
   function getValue(item) { return item.cases ? item.cases.length : item.value; }
@@ -688,7 +676,7 @@
         e.stopPropagation();
         item.cases.push(newCase(new Date().toISOString().slice(0, 10), '', '', ''));
         renderTypeBars();
-        refreshJobSide();
+        renderKpis();
       });
       detail.appendChild(addBtn);
 
@@ -712,11 +700,7 @@
           btn.classList.toggle('disabled', !hasLink);
           btn.title = hasLink ? '링크 열기' : '링크 없음';
         }
-        if (e.target.dataset.field === 'affil') {
-          refreshJobSide(); // 소속이 바뀌면 매장/본사 집계 및 KPI 갱신
-        } else {
-          renderKpis(); // 포커스를 잃지 않도록 KPI만 갱신
-        }
+        renderKpis(); // 포커스를 잃지 않도록 KPI만 갱신, 전체 리렌더는 하지 않음
       });
     });
     container.querySelectorAll('.case-link-open').forEach(btn => {
@@ -731,14 +715,14 @@
         const t = typeData.find(x => x.id === e.target.dataset.type);
         t.cases = t.cases.filter(x => x.id !== e.target.dataset.case);
         renderTypeBars();
-        refreshJobSide();
+        renderKpis();
       });
     });
 
     playBarEntrance(container);
   }
 
-  function renderBars(containerId, data) {
+  function renderBars(containerId, data, onChangeFn) {
     const total = sum(data);
     const container = document.getElementById(containerId);
     container.innerHTML = '';
@@ -751,7 +735,7 @@
         <div class="bar-top">
           <span class="bar-name">${item.name}</span>
           <div class="bar-value-group">
-            <span style="font-family:'Oswald', sans-serif; font-size:20px; font-weight:600; color:${item.color};">${item.value}</span>
+            <input class="bar-input" type="number" min="0" value="${item.value}" style="color:${item.color}" data-id="${item.id}" />
             <span class="bar-unit">명</span>
             <span class="bar-pct">(${pct}%)</span>
           </div>
@@ -765,6 +749,13 @@
         </div>
       `;
       container.appendChild(row);
+    });
+    container.querySelectorAll('input').forEach(input => {
+      input.addEventListener('input', (e) => {
+        const id = e.target.dataset.id;
+        const val = Math.max(0, Number(e.target.value) || 0);
+        onChangeFn(id, val);
+      });
     });
     playBarEntrance(container);
   }
@@ -845,16 +836,15 @@
 
     const store = jobData.find(j => j.id === 'store');
     const office = jobData.find(j => j.id === 'office');
-    const unassigned = jobData.find(j => j.id === 'unassigned');
     const storeShare = jobTotal > 0 ? Math.round(((store?.value || 0) / jobTotal) * 100) : 0;
     document.getElementById('kpiStoreShare').textContent = storeShare + '%';
     document.getElementById('kpiStoreShareSub').textContent = `매장 ${store?.value || 0}명 · 본사 ${office?.value || 0}명`;
 
     const mismatchBox = document.getElementById('mismatchBox');
-    if (unassigned && unassigned.value > 0) {
+    if (typeTotal !== jobTotal) {
       mismatchBox.style.display = 'inline-flex';
       document.getElementById('mismatchText').textContent =
-        `${unassigned.value}건은 "소속"이 입력되지 않아 매장/본사 구분에서 "소속 미입력"으로 집계되었습니다. 각 사건에 소속을 입력하면 자동으로 반영됩니다.`;
+        `유형별 합계(${typeTotal}명)와 직무별 합계(${jobTotal}명)가 일치하지 않습니다. 확인이 필요합니다.`;
     } else {
       mismatchBox.style.display = 'none';
     }
@@ -862,14 +852,14 @@
 
   function renderAll() {
     renderTypeBars();
-    refreshJobSide();
-  }
-
-  function refreshJobSide() {
-    jobData = computeJobData();
-    renderBars('jobBars', jobData);
+    renderBars('jobBars', jobData, updateJob);
     renderRing();
     renderKpis();
+  }
+
+  function updateJob(id, value) {
+    jobData = jobData.map(it => it.id === id ? { ...it, value } : it);
+    renderAll();
   }
 
   function showStatus(msg, isError) {
@@ -913,14 +903,14 @@
     reader.onload = (evt) => {
       try {
         const data = JSON.parse(evt.target.result);
-        if (!Array.isArray(data.typeData)) {
+        if (!Array.isArray(data.typeData) || !Array.isArray(data.jobData)) {
           throw new Error('형식이 올바르지 않습니다');
         }
         typeData = data.typeData.map(t => ({
           id: t.id, name: t.name, color: t.color, open: false,
           cases: (t.cases || []).map(c => newCase(c.date || '', c.name || '', c.affil || '', c.desc || '', c.link || '')),
         }));
-        // jobData(매장/본사)는 각 사건의 "소속" 값을 기준으로 자동 재계산됩니다.
+        jobData = data.jobData.map(j => ({ id: j.id, name: j.name, color: j.color, value: j.value || 0 }));
         isFirstPaint = true; // 새 데이터를 불러올 때도 시각적으로 펼쳐지는 효과 재생
         renderAll();
         isFirstPaint = false;
