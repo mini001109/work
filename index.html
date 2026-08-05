@@ -547,30 +547,31 @@
     return { id: 'c' + (caseSeq++), date, name: name || '', affil: affil || '', desc, link: link || '' };
   }
 
-  // 샘플(예시) 데이터입니다 — 실제 사건 내용으로 교체해서 사용하세요.
+  // 실제 사건 데이터
   let typeData = [
     {
       id: 'commute', name: '출퇴근 산재', color: '#4C6B8A', open: false,
       cases: [
-        newCase('2026-01-14', '홍길동', '강남점', '(예시) 출근길 도보 이동 중 빙판길에 미끄러져 발목 부상', 'https://example.com/docs/case-01'),
-        newCase('2026-03-02', '김민수', '본사', '(예시) 퇴근 중 자전거 이용 시 넘어짐, 손목 염좌'),
-        newCase('2026-05-20', '이서연', '홍대점', '(예시) 대중교통 환승 중 계단에서 미끄러짐'),
+        newCase('2026-03-12', '허금빛(스무디)', '현대 송도', '우측 발목 접지름 (공단 통지서 X)', 'https://drive.google.com/drive/folders/1EdMebIVQYzkTMs3rRbC2soeuCa1i2mmG?usp=sharing'),
+        newCase('2026-05-09', '김문정(부)', '압구정스파', '출근길에 차량이 발을 밟고 지나가 부상을 입음', ''),
+        newCase('2026-07-21', '박혜원(래즐)', '본사', '출근 길에 발목을 접지름', ''),
       ],
     },
     {
       id: 'work', name: '업무상 재해', color: '#C1443C', open: false,
       cases: [
-        newCase('2026-02-10', '박지훈', '물류센터', '(예시) 작업 중 물건 낙하로 인한 손 부상'),
-        newCase('2026-06-18', '최유진', '물류센터', '(예시) 지게차 이동 중 협착 사고'),
+        newCase('2026-04-30', '조성채(듀)', '타임스퀘어', '손에 심각한 습진 발생', 'https://drive.google.com/drive/folders/10O1ysR5o38wsuRi7TxQIoc8rxQJk8Ifk?usp=sharing'),
+        newCase('2026-06-16', '김문정(부)', '압구정스파', '장기간 반복적인 마사지 시술 업무로 우측 엄지 및 손목 부위 통증 발생', 'https://drive.google.com/drive/folders/1Y6OKO5434ZB3GbMr2LMzyILitspoxOuN?usp=sharing'),
       ],
     },
     {
       id: 'gongsang', name: '공상처리', color: '#F2A719', open: false,
       cases: [
-        newCase('2026-01-25', '정하늘', '신촌점', '(예시) 매장 내 이동 중 넘어짐, 경미한 타박상'),
-        newCase('2026-03-30', '오세훈', '물류센터', '(예시) 물류 정리 중 손가락 베임'),
-        newCase('2026-05-08', '강나연', '강남점', '(예시) 청소 작업 중 미끄러짐'),
-        newCase('2026-07-02', '윤도현', '본사', '(예시) 물건 운반 중 허리 통증 발생'),
+        newCase('2026-01-25', '이규리(셰이)', '홍대점', '매장 내 백룸 캐비넷 위 박스가 떨어져 목과 어깨 통증 및 두통 호소', 'https://drive.google.com/drive/folders/19R2ZeK0IQbF7GCSMrFc6NH6dgiYDSrjn?usp=sharing'),
+        newCase('2026-03-30', '김진환(플레임)', '커넥트현대 청주', '백룸 입구와 틸존 사이 벽 아래 철판에 손이 긁혀 찢어짐', 'https://drive.google.com/drive/folders/1Y6OKO5434ZB3GbMr2LMzyILitspoxOuN?usp=sharing'),
+        newCase('2026-06-03', '이민지(샨)', '롯데월드몰', '백룸 캐비넷 위에 적재된 쇼핑백 박스에 맞아 뇌진탕 및 왼쪽 어깨 ·손목 염좌', 'https://drive.google.com/drive/folders/1OkbrpfFsdMHY9iSiBfBMLwvlVcMxVW8E?usp=sharing'),
+        newCase('2026-07-21', '이예지(루나)', '본사', '비오는 날 옥상에 갔다가 7층으로 내려오는 길에 미끄러운 계단에서 넘어져  허리, 팔꿈치 등의 염좌 · 타박상 발생 ', 'https://drive.google.com/drive/folders/1IogT1tGD_9148WKJ0E85rd7laDFuPt1o?usp=sharing'),
+        newCase('2026-08-04', '이수현(프리티)', '롯데 평촌', '펜타포트 지원 근무로 상체와 오금 등의 신체에 일광 화상을 입어 공상 처리', 'https://drive.google.com/drive/folders/1cFX0VrSfzSVmo3Tmz7xduBB8NBWhzVY_?usp=sharing'),
       ],
     },
   ];
@@ -620,7 +621,7 @@
         <div class="bar-top">
           <span class="bar-name" style="display:flex; align-items:center;">
             <svg class="chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="${item.color}" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:6px;"><polyline points="9 18 15 12 9 6"></polyline></svg>
-            ${item.name}<span class="sample-tag">예시</span>
+            ${item.name}
           </span>
           <div class="bar-value-group">
             <span style="font-family:'Oswald', sans-serif; font-size:20px; font-weight:600; color:${item.color};">${val}</span>
